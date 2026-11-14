@@ -1,0 +1,34 @@
+[
+  {
+    "id": "1",
+    "name": "[NCT WISH] 공식 응원봉 (OFFICIAL FANLIGHT)",
+    "image": "https://placeholder.com",
+    "url": "https://smtownandstore.com",
+    "inStock": true,
+    "isNew": true
+  },
+  {
+    "id": "2",
+    "name": "[NCT WISH] 위시 인형 키링 (WISH DOLL KEYRING)",
+    "image": "https://placeholder.com",
+    "url": "https://smtownandstore.com",
+    "inStock": true,
+    "isNew": false
+  },
+  {
+    "id": "3",
+    "name": "[NCT WISH] 랜덤 트레이딩 카드 세트",
+    "image": "https://placeholder.com",
+    "url": "https://smtownandstore.com",
+    "inStock": false,
+    "isNew": false
+  },
+  {
+    "id": "4",
+    "name": "[NCT WISH] 아크릴 스탠드 (멤버별 선택)",
+    "image": "https://placeholder.com",
+    "url": "https://smtownandstore.com",
+    "inStock": false,
+    "isNew": false
+  }
+]
