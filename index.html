@@ -170,11 +170,9 @@
 <script>
   async function loadGoods() {
     try {
-      // 캐시 방지를 위해 현재 시간을 쿼리로 붙임
       const response = await fetch('./goods.json?t=' + new Date().getTime());
       const items = await response.json();
 
-      // 정렬 로직: 1순위 재입고(NEW), 2순위 재고있음, 3순위 품절
       items.sort((a, b) => {
         const scoreA = (a.inStock ? 2 : 0) + (a.isNew ? 1 : 0);
         const scoreB = (b.inStock ? 2 : 0) + (b.isNew ? 1 : 0);
@@ -209,7 +207,7 @@
         card.innerHTML = `
           <div class="image-wrap">
             <div class="badges">${badgesHtml}</div>
-            <img src="${item.image}" alt="${item.name}" loading="lazy">
+            <img src="${item.image}" alt="${item.name}" referrerpolicy="no-referrer" loading="lazy">
           </div>
           <div class="info">
             <div class="title">${item.name}</div>
