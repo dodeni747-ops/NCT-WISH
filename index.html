@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NCT WISH 굿즈 재입고 알리미</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", sans-serif;
+    }
+    body {
+      background-color: #f4f6f8;
+      color: #111;
+      padding: 20px 16px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+      padding: 20px;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    header h1 {
+      font-size: 20px;
+      font-weight: 800;
+      color: #111;
+      margin-bottom: 6px;
+    }
+    header p {
+      font-size: 13px;
+      color: #666;
+    }
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      font-size: 13px;
+      color: #555;
+      padding: 0 4px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    @media (min-width: 600px) {
+      .grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+    }
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      overflow: hidden;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      transition: transform 0.15s ease;
+      position: relative;
+      border: 2px solid transparent;
+    }
+    .card:active {
+      transform: scale(0.98);
+    }
+    .card.in-stock {
+      border-color: #a3e635;
+    }
+    .card.sold-out {
+      opacity: 0.6;
+    }
+    .image-wrap {
+      position: relative;
+      width: 100%;
+      padding-top: 100%;
+      background: #eee;
+    }
+    .image-wrap img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .badges {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      display: flex;
+      gap: 4px;
+      z-index: 2;
+    }
+    .badge {
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+    }
+    .badge-new {
+      background: #ff3b30;
+      color: #fff;
+      animation: pulse 1.5s infinite;
+    }
+    .badge-stock {
+      background: #a3e635;
+      color: #111;
+    }
+    .badge-soldout {
+      background: rgba(0, 0, 0, 0.7);
+      color: #fff;
+    }
+    .info {
+      padding: 12px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .title {
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.4;
+      word-break: keep-all;
+      margin-bottom: 8px;
+    }
+    .link-text {
+      font-size: 11px;
+      font-weight: 700;
+      color: #4d7c0f;
+    }
+    .sold-out .link-text {
+      color: #888;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+      100% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>💚 NCT WISH 굿즈 재입고 확인</h1>
+    <p>구매 가능한 상품이 최상단에 자동 정렬됩니다</p>
+  </header>
+
+  <div class="status-bar">
+    <span id="summary">불러오는 중...</span>
+    <span>클릭 시 SM&STORE 이동</span>
+  </div>
+
+  <div class="grid" id="goods-list"></div>
+</div>
+
+<script>
+  async function loadGoods() {
+    try {
+      // 캐시 방지를 위해 현재 시간을 쿼리로 붙임
+      const response = await fetch('./goods.json?t=' + new Date().getTime());
+      const items = await response.json();
+
+      // 정렬 로직: 1순위 재입고(NEW), 2순위 재고있음, 3순위 품절
+      items.sort((a, b) => {
+        const scoreA = (a.inStock ? 2 : 0) + (a.isNew ? 1 : 0);
+        const scoreB = (b.inStock ? 2 : 0) + (b.isNew ? 1 : 0);
+        return scoreB - scoreA;
+      });
+
+      const listEl = document.getElementById('goods-list');
+      const summaryEl = document.getElementById('summary');
+      
+      const availableCount = items.filter(item => item.inStock).length;
+      summaryEl.textContent = `구매 가능 ${availableCount}개 / 전체 ${items.length}개`;
+
+      listEl.innerHTML = '';
+
+      items.forEach(item => {
+        const card = document.createElement('a');
+        card.href = item.url;
+        card.target = '_blank';
+        card.rel = 'noopener noreferrer';
+        card.className = `card ${item.inStock ? 'in-stock' : 'sold-out'}`;
+
+        let badgesHtml = '';
+        if (item.inStock && item.isNew) {
+          badgesHtml += `<span class="badge badge-new">NEW 재입고</span>`;
+        }
+        if (item.inStock) {
+          badgesHtml += `<span class="badge badge-stock">구매가능</span>`;
+        } else {
+          badgesHtml += `<span class="badge badge-soldout">SOLD OUT</span>`;
+        }
+
+        card.innerHTML = `
+          <div class="image-wrap">
+            <div class="badges">${badgesHtml}</div>
+            <img src="${item.image}" alt="${item.name}" loading="lazy">
+          </div>
+          <div class="info">
+            <div class="title">${item.name}</div>
+            <div class="link-text">${item.inStock ? '구매하러 가기 →' : '상품 페이지 보기 →'}</div>
+          </div>
+        `;
+
+        listEl.appendChild(card);
+      });
+    } catch (error) {
+      document.getElementById('summary').textContent = '데이터를 불러오지 못했습니다.';
+    }
+  }
+
+  loadGoods();
+</script>
+
+</body>
+</html>
